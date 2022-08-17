@@ -758,7 +758,26 @@ def set_priority(hash_id):
         LOGGER.error("Verification Failed")
     client.auth_log_out()
     return list_torrent_contents(hash_id)
+if ospath.exists('.git'):
+    commit_date = check_output(["git log -1 --date=format:'%y/%m/%d %H:%M' --pretty=format:'%cd'"], shell=True).decode()
+else:
+    commit_date = 'No UPSTREAM_REPO'
 
+@app.route('/status', methods=['GET'])
+def status():
+    uptime = time() - boot_time()
+    sent = net_io_counters().bytes_sent
+    recv = net_io_counters().bytes_recv
+    return {
+        'commit_date': commit_date,
+        'uptime': uptime,
+        'free_disk': disk_usage('.').free,
+        'total_disk': disk_usage('.').total,
+        'network': {
+            'sent': sent,
+            'recv': recv,
+        },
+    }
 @app.route('/')
 def homepage():
     return "<h1>See @Z_Mirror_Bot <a href='https://github.com/Dawn-India/Z-Mirror'>@GitHub</a> By <a href='https://github.com/Dawn-India'>Dawn In</a></h1>"
